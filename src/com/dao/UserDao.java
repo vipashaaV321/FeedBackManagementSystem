@@ -3,8 +3,10 @@ package com.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
+import com.bean.ReportBean;
 import com.bean.UserBean;
 import com.util.DbConnection;
 
@@ -54,43 +56,48 @@ public class UserDao {
 		return usersArrayList;
 	}
 	
-	public void deleteUser(int userId) {
-		// TODO Auto-generated method stub
+
+public static boolean getLogin(String email,String password) {
+		boolean status=false; 
+		UserBean userBean=new UserBean();
+		
 		try {
 			Connection con = DbConnection.getConnection();
-			PreparedStatement pstmt = con.prepareStatement("delete from users where userId = ?");
-			pstmt.setInt(1, userId);
-			pstmt.executeUpdate();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	public ArrayList<UserBean> searchUserByName(String searchName) {
-		ArrayList<UserBean> users = new ArrayList<UserBean>();
-
-		try {
-			Connection con = DbConnection.getConnection();
-			PreparedStatement pstmt = con.prepareStatement("select * from users where firstName like ?");
-			pstmt.setString(1, searchName);
-
+			PreparedStatement pstmt = con.prepareStatement("select * from user where email=? and password=?");
+			pstmt.setString(1, email);
+			pstmt.setString(2, password);	
+//			int userId=userBean.getUserId();
+//			pstmt.setLong(3, userId);
 			ResultSet rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-
-				UserBean userBean = new UserBean();
-				userBean.setUserId(rs.getInt("userId"));
-				userBean.setFirstName(rs.getString("firstName"));
-				userBean.setEmail(rs.getString("email"));
-
-				users.add(userBean);
-			}
-
+			status=rs.next();  
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return users;
+		return status;
 	}
+public UserBean getUserByEmail(String email) {
+	UserBean userBean = null;
+
+	try {
+		Connection con = DbConnection.getConnection();
+		PreparedStatement pstmt = con.prepareStatement("select * from user where email like ?");
+		pstmt.setString(1, email);
+
+		ResultSet rs = pstmt.executeQuery();
+		if (rs.next()) {
+
+			userBean = new UserBean();
+			userBean.setUserId(rs.getInt("userId"));
+			userBean.setFirstName(rs.getString("firstName"));
+			userBean.setEmail(rs.getString("email"));
+			userBean.setPassword(rs.getString("password"));
+		}
+
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+
+	return userBean;
+}
 
 }

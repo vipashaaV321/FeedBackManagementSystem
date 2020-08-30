@@ -1,6 +1,7 @@
 package com.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,6 +15,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.dao.UserDao;
 @WebServlet(value="/LoginController")
 public class LoginController extends HttpServlet{
 	String adminEmail ;
@@ -33,9 +36,10 @@ public class LoginController extends HttpServlet{
 	      System.out.println(cal.getTime().toString());
 	      // time information
 	      System.out.println("Hour (24 hour format) : " + cal.get(Calendar.HOUR_OF_DAY));
-	     
+	      PrintWriter out = response.getWriter();  
 		String email = request.getParameter("email");
 		String password = request.getParameter("password");
+//		String UserId=request.getParameter("userId");
 		RequestDispatcher rd  = null;
 		if(adminEmail.equals(email) && adminPassword.equals(password)) {
 				rd = request.getRequestDispatcher("AdminHome.jsp");
@@ -51,12 +55,18 @@ public class LoginController extends HttpServlet{
 			    	  request.setAttribute("wish", "Good Night");
 			    	  System.out.println("gn");
 			      }
-		}else {
+		}
+		else if (UserDao.getLogin(email,password)) {
+			rd = request.getRequestDispatcher("UserHome.jsp");
+			request.setAttribute("msg","you have Logged in succesfully");
+			HttpSession session = request.getSession(); //login -> session server if not found new session will create and return 
+			session.setAttribute("email", email);
+			
+		}
+		else {
 			rd = request.getRequestDispatcher("Login.jsp");
 			request.setAttribute("msg", "Invalid Credentials!!!");
 		}
-		
-//		session.setMaxInactiveInterval(60*2);
 	
 		rd.forward(request, response);
 	}	
